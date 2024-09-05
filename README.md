@@ -29,5 +29,9 @@ This is a simple Python implementation of the classic game "Rock, Paper, Scissor
 3. Run the following command:
 
    ```bash
-   python rock_paper_scissors.py
+   for windows
+   python game.py
+
+   for mac
+   python3 game.py
    ```
