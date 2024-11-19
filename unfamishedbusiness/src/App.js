@@ -4,8 +4,8 @@ import LandingPage from "./LandingPage";
 import Login from "./Login";
 import Register from "./Register";
 import Search from "./Search";
-import './App.css';
-
+import SavedRecipes from "./SavedRecipes";
+import "./App.css";
 
 function App() {
   return (
@@ -15,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/saved-recipes" element={<SavedRecipes />} />
       </Routes>
     </Router>
   );
