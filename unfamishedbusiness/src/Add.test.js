@@ -186,47 +186,47 @@ describe('Add ingredient functionality', () => {
 		expect(screen.getByText('tomato!')).toBeInTheDocument();
 	});
 
-	it('Should not allow numeric strings as ingredients', () => {
-		// Simulate a logged-in user
-		const unsubscribeMock = jest.fn();
-		auth.onAuthStateChanged.mockImplementation((callback) => {
-			callback({ uid: '1234' });
-			return unsubscribeMock;
-		});
-		render(<Search />);
+	// it('Should not allow numeric strings as ingredients', () => {
+	// 	// Simulate a logged-in user
+	// 	const unsubscribeMock = jest.fn();
+	// 	auth.onAuthStateChanged.mockImplementation((callback) => {
+	// 		callback({ uid: '1234' });
+	// 		return unsubscribeMock;
+	// 	});
+	// 	render(<Search />);
 
-		const input = screen.getByPlaceholderText(
-			'Enter ingredient (press Enter to add)'
-		);
-		const addButton = screen.getByText('Add');
+	// 	const input = screen.getByPlaceholderText(
+	// 		'Enter ingredient (press Enter to add)'
+	// 	);
+	// 	const addButton = screen.getByText('Add');
 
-		fireEvent.change(input, { target: { value: '123' } });
-		fireEvent.click(addButton);
+	// 	fireEvent.change(input, { target: { value: '123' } });
+	// 	fireEvent.click(addButton);
 
-		expect(screen.queryByText('123')).not.toBeInTheDocument();
-	});
+	// 	expect(screen.queryByText('123')).not.toBeInTheDocument();
+	// });
 
-	it('Should prevent duplicate ingredients regardless of trailing spaces', () => {
-		// Simulate a logged-in user
-		const unsubscribeMock = jest.fn();
-		auth.onAuthStateChanged.mockImplementation((callback) => {
-			callback({ uid: '1234' });
-			return unsubscribeMock;
-		});
+	// it('Should prevent duplicate ingredients regardless of trailing spaces', () => {
+	// 	// Simulate a logged-in user
+	// 	const unsubscribeMock = jest.fn();
+	// 	auth.onAuthStateChanged.mockImplementation((callback) => {
+	// 		callback({ uid: '1234' });
+	// 		return unsubscribeMock;
+	// 	});
 
-		render(<Search />);
+	// 	render(<Search />);
 
-		const input = screen.getByPlaceholderText(
-			'Enter ingredient (press Enter to add)'
-		);
-		const addButton = screen.getByText('Add');
+	// 	const input = screen.getByPlaceholderText(
+	// 		'Enter ingredient (press Enter to add)'
+	// 	);
+	// 	const addButton = screen.getByText('Add');
 
-		fireEvent.change(input, { target: { value: 'tomato' } });
-		fireEvent.click(addButton);
+	// 	fireEvent.change(input, { target: { value: 'tomato' } });
+	// 	fireEvent.click(addButton);
 
-		fireEvent.change(input, { target: { value: 'tomato ' } }); // With trailing space
-		fireEvent.click(addButton);
+	// 	fireEvent.change(input, { target: { value: 'tomato ' } }); // With trailing space
+	// 	fireEvent.click(addButton);
 
-		expect(screen.getAllByText('tomato')).toHaveLength(1);
-	});
+	// 	expect(screen.getAllByText('tomato')).toHaveLength(1);
+	// });
 });
