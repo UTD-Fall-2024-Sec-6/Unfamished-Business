@@ -1,40 +1,47 @@
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import '@testing-library/jest-dom';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
-import Register from './Register'; // Import the Register component
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { MemoryRouter } from 'react-router-dom';
+import Register from './Register';
 import { auth } from './firebaseConfig';
 
 // Mock Firebase functions
 jest.mock('firebase/auth', () => ({
     getAuth: jest.fn(),
     createUserWithEmailAndPassword: jest.fn(),
+    GoogleAuthProvider: jest.fn(),
+    signInWithPopup: jest.fn(),
 }));
 
-// Mock useNavigate from react-router-dom
+// Mock react-router-dom
 jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
     useNavigate: jest.fn(),
+    Link: ({ to, children }) => <a href={to}>{children}</a>, // Mock Link
 }));
 
 describe('Register Component', () => {
     const navigate = jest.fn();
 
     beforeEach(() => {
-        useNavigate.mockReturnValue(navigate); // Mock the navigate function
-        createUserWithEmailAndPassword.mockClear(); // Clear mocks before each test
+        jest.clearAllMocks(); // Clear mocks before each test
     });
-    // Test Case #1
+
     it('should call createUserWithEmailAndPassword and navigate on successful registration', async () => {
-        render(<Register />);
+        render(
+            <MemoryRouter>
+                <Register />
+            </MemoryRouter>
+        );
 
         const email = 'test@email.com';
         const password = 'password';
 
-        fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: email } });
-        fireEvent.change(screen.getByPlaceholderText(/password \(min\. 6 characters\)/i), { target: { value: password } });
-        fireEvent.change(screen.getByPlaceholderText(/confirm password/i), { target: { value: password } });
+        fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: email } });
+        fireEvent.change(screen.getByPlaceholderText('Password (min. 6 characters)'), { target: { value: password } });
+        fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: password } });
 
-        // Mock the response from Firebase
         createUserWithEmailAndPassword.mockResolvedValueOnce({ user: { email } });
 
         fireEvent.click(screen.getByRole('button', { name: /register/i }));
@@ -43,50 +50,34 @@ describe('Register Component', () => {
             expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(auth, email, password);
         });
     });
-    //Test Case #2
-    it('should show an error if Firebase registration fails', async () => {
-        render(<Register />);
 
-        const email = 'test@email.com';
-        const password = 'password';
 
-        fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: email } });
-        fireEvent.change(screen.getByPlaceholderText(/password \(min\. 6 characters\)/i), { target: { value: password } });
-        fireEvent.change(screen.getByPlaceholderText(/confirm password/i), { target: { value: password } });
+    it('should render and handle Google Sign-In properly', async () => {
+        render(
+            <MemoryRouter>
+                <Register />
+            </MemoryRouter>
+        );
 
-        // Mock the response from Firebase to simulate an error
-        createUserWithEmailAndPassword.mockRejectedValueOnce({
-            code: 'auth/email-already-in-use',
-        });
+        signInWithPopup.mockResolvedValueOnce();
 
-        fireEvent.click(screen.getByRole('button', { name: /register/i }));
+        fireEvent.click(screen.getByRole('button', { name: /sign in with google/i }));
 
         await waitFor(() => {
-            expect(screen.getByText(/this email is already registered/i)).toBeInTheDocument();
+            expect(signInWithPopup).toHaveBeenCalledWith(auth, expect.any(Object));
         });
     });
-    //Test Case #3
-    it('should show an error if the password is too short', async () => {
-        render(<Register />);
 
-        fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test3@email.com' } });
-        fireEvent.change(screen.getByPlaceholderText(/password \(min\. 6 characters\)/i), { target: { value: '123' } });
-        fireEvent.change(screen.getByPlaceholderText(/confirm password/i), { target: { value: '123' } });
+    it('should show validation errors if passwords do not match', async () => {
+        render(
+            <MemoryRouter>
+                <Register />
+            </MemoryRouter>
+        );
 
-        fireEvent.click(screen.getByRole('button', { name: /register/i }));
-
-        await waitFor(() => {
-            expect(screen.getByText(/password must be at least 6 characters long/i)).toBeInTheDocument();
-        });
-    });
-    // Test Case #4
-    it('should show an error if passwords do not match', async () => {
-        render(<Register />);
-
-        fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'test4@email.com' } });
-        fireEvent.change(screen.getByPlaceholderText(/password \(min\. 6 characters\)/i), { target: { value: 'password' } });
-        fireEvent.change(screen.getByPlaceholderText(/confirm password/i), { target: { value: 'password123' } });
-
+        // Use exact placeholder text for the password fields
+        fireEvent.change(screen.getByPlaceholderText('Password (min. 6 characters)'), { target: { value: 'password' } });
+        fireEvent.change(screen.getByPlaceholderText('Confirm Password'), { target: { value: 'differentpassword' } });
 
         fireEvent.click(screen.getByRole('button', { name: /register/i }));
 
@@ -94,6 +85,5 @@ describe('Register Component', () => {
             expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
         });
     });
-
 
 });

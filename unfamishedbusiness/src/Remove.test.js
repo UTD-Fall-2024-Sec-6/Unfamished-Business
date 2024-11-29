@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Search from "./Search";
+import '@testing-library/jest-dom';
+
 
 // Mock Firebase modules
 jest.mock("firebase/auth", () => ({
